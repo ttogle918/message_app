@@ -1,84 +1,38 @@
-# Spring MVC
-+ 메시지 앱 -> 웹 애플리케이션
-+ HTTP 요청을 받는 컨트롤러 추가
-+  pom.xml 파일에 스트링 부트 의존성 추가
+# 스프링 JDBC와 JPA
+### 메시지 앱의 영속성 기능 구현
++ JDBC 드라이버 직접 사용하기
++ spring JDBC 사용하기
++ 하이버네이트 사용하기
+------
+### 설명
++ JDBC : Java Database Connectivity API, 관계형 데이터베이스에 저장된 데이터에 접근하는 방법 정의. 데이터베이스와의 상호작용을 해결. Spring JDBC를 사용하자.
++ JPA : Java Persistence API, 자바 객체의 영속성을 위한 자바의 표준화된 접근 방식 정의. 객체 관계형 매핑(ORM)으로 객체 지향 방식으로 데이터베이스에 객체를 저장, 가져오는 방법을 담당한다. - JPA구현체는 JDBC 드라이버에 의존하여 DB에 접근한다.
++ Hibernate ORM : 가장 흔히 사용하는 JPA 표준을 구현한 구현체. 영속성 처리를 위해 사용
 
 ------------------
-### JAVA EE Servlet
-###   : 톰캣과 같은 애플리케이션 서버인 서블릿 컨테이너 내에서 동작.
- 
-> 1. 클라이언트가 애플리케이션 서버에게 HTTP 요청을 보냄
+### 순서
+
+> 1. mysql에 DB와 messages 테이블 생성
 >
-> 2. 애플리케이션 서버 내에서 필터를 통과(인증, 로깅, 감사 등)
+> 2. pom.xml 수정 -> 스프링 컨테이너에서 빈 사용 가능, DB 커넥션 풀 설정
 >
-> 3. 서버는 서블릿(요청 처리 서블릿, 첫번째 요청 : HttpSession - session ID를 가진다.)에게 해당 요청을 넘김
+> 3. application.properties 파일에 프로퍼티 추가 -> 스프링이 DataSource를 인스턴스화하는 데 필요한 매개변수를 설정
 >    
-> 4. 서블릿이 요청에 대한 처리를 마치면 HTTP 응답(HttpServletRequest)은 필터를 통과한 후 클라이언트로 전송됨
+> 4. MessageRepository 클래스 변경 -> DataSource에서 DB연결을 얻을 수 있도록 데이터 주입 스프링에 요청
+>
+> 5. MessageService, Controller 클래스 변경 -> 메시지 저장을 위한 HTTP API를 제공. 
+>
+> 6. MessageData : API의 요청 본문에 대한 정의
 
-    ------
-### Spring MVC
-###  : spring MVC를 사용하면 Servlet을 생성할 필요가 없다.
+------
+### app 실행 시 순서
 
-> @Controller 어노테이션 추가하고, @RequestMapping 어노테이션으로 특정 URI패턴에 매핑할 수 있다.
-> Spring은 DispatcherServlet(핵심 요청 처리 서블릿, 알맞는 컨트롤러를 찾음)을 활용한다.
-> 
-> M : model, 데이터
-> V : View, html 마크업이 위치, C에게 M(data)를 받아 최종 결과를 렌더링
-> C : controller, M(data)을 생성하고 HTTP 응답을 통해 클라이언트에 전송
+> 1. Controller의 해당 request 메소드 호출
+> 2. controller에서 service 호출
+> 3. service에서 repository 호출
 
-### View 추가
-> src/resources/templates에 위치
-> html에 있는 "${message}"를 통해 Controller에서 전달할 모델에서 message값을 가져올 수 있다.
-> -> @ResponseBody 어노테이션이 불필요하므로 제거
-> 스프링은 handler의 return 값을 view의 이름으로 사용하고, timeleap로 응답을 생성한다.
-> 
-> 스프링 MVC에서 org.springframework.web.servlet.ModeAndView 인스턴트를 반환함으로써 모델과 뷰를 사용할 수도 있다.
-> 매개변수로 model을 주느냐, 새로 model객체를 생성하느냐의 차이다. 아래에서는 객체를 생성하여 데이터를 추가하였다. 
-      @GetMapping("/welcome")
-      public ModelAndView welcome() {
-        ModelAndView mv = new ModelAndView("welcome");
-        mv.addObject("message", "Hello, Welcome to Spring Boot!");
-        return mv;
-      }
-
-### 필터(filter)
-> 책임 연쇄 패턴(Chain of Responsibility) 구현
-> 서블릿에 도달하기 전에 HTTP 요청에 대한 필터링 작업을 수행하려고 할 때 유용
-> 
-> javax.servlet.Filter 인터페이스 구현/org.springframework.web.filter.GenericFilterBean을 확장하여 필터 구현 가능
-
-#### 필터 등록 방법
-+ web.xml파일에 <filter>, <filter-mapping>을 추가, 등록. 웹 어플리케이션을 위해 사용된다.
-+ FilterRegistrationBean을 만들어 AppConfig 설정 클래스에 등록.
-
-### 프로퍼티(properties)
-> 필요한 정보들을 파일로 저장해놓고 사용한다. 
-> key=value 형식의 텍스트 파일을 다룰 때 사용하는 클래스이다. 아래처럼 사용할 수 있다.
-
-Properties properties = new Properties();
-properties.load(new FileReader("C:../application.properties"));
- 
-for (Object object: properties.keySet()) {
-    System.out.println(object + " = " + properties.get(object));
-}
-
-
-
-### maven 변화
-> mvn install 실행한 뒤,
-> java -jar target/messages-jar-with-dependencies.jar 명령어를 실행하면 이제 동작하지 않는다.
-> -> Application run failed 에러 표시
-
-> maven-assembly-plugin은 스프링 부트 어플리케이션을 실행할 수 없다.
-> -> <build>에서 maven-assembly-plugin 대신에 spring-boot-maven-plugin을 추가하자.
-
-> mvn spring-boot:run : 이제 mvn install 명령어를 실행할 필요가 없다.
-
-  ### @ResponseBody 어노테이션을 핸들러 메소드에 추가
->  (클래스에도 추가 가능 - 모든 메소드 적용 효과)
-> 스프링은 해당 메소드의 반환값을 HTTP 응답의 본문으로 처리, 대응하는 HttpMessageConverter를 찾아 응답에 값을 쓴다.
-    
-  ### 기타
-+ 서버 예열(Server Warming Up) : 서버의 첫번째 요청까지 걸린 시간과 비교하면 페이지를 새로 고쳤을 때 걸리는 시간이 매우 빠르다. 전자는 DispatcherServlet을 초기화하는데 오래 걸리기 때문이다.
-
-+ WebFlux : 스프링 프레임워크 5의 새로운 웹 스택. 많은 양의 동시 연결을 처리하기 위해 만들어진 논블로킹 웹 프레임워크다. 이 프로젝트에서는 전통적인 스프링 MVC를 사용한다.
+### 문제점 -> 해결
+> 1. repository의 ps.getGeneratedKeys() 익셉션(아마도 앱을 불러오는 동안 예외발생 되는듯)
+> id가 null이 들어갔군(not null이여야함)
+>     -> insert 'id'  에서 ' 제거했더니 실행됨. sql문장 예외였던 것 같다.
+> 2. controller에서 msg service.save가 null되었음 ( 1번과 같은 에러)

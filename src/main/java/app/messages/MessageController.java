@@ -1,17 +1,40 @@
 package app.messages;
 
+import java.util.logging.Logger;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/messages")
+@RequestMapping("/")
 public class MessageController {
-  // Http get 요청 매핑
-  @GetMapping("/welcome")   // = (value = "/welcome", method = RequestMethod.GET)
+  private final static Logger log = Logger.getGlobal();
+
+  private MessageService messageService;
+
+  public MessageController(MessageService messageService) {
+    this.messageService = messageService;
+  }
+
+  @GetMapping("/welcome")
   public String welcome(Model model) {
     model.addAttribute("message", "Hello, Welcome to Spring Boot!");
     return "welcome";
+  }
+
+  @RequestMapping(value="/messages", method={RequestMethod.POST, RequestMethod.GET})
+  public @ResponseBody ResponseEntity<Message> saveMessage(@RequestBody MessageData data) {
+    
+    log.info("saveMsg start");
+    Message saved = messageService.save(data.getText());
+    log.info("msg saved");
+    if (saved == null) {
+      log.info("msg saved null");
+
+      return ResponseEntity.status(500).build();
+    }
+    return ResponseEntity.ok(saved);
   }
 }
