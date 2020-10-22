@@ -3,24 +3,43 @@ package app.messages;
 import java.util.Date;
 import java.util.Objects;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Entity
+@Table(name="messages")
 public class Message {
-
-  // For unsaved message, the id will be null
+  
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
   private Integer id;
-  private String text;
-  private Date createdDate;
 
+  @Column(name = "text", nullable = false, length = 128)
+  private String text;
+
+  @Column(name = "created_date", nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date createdDate;
+  
+  @Autowired
+  public Message() { 
+
+  }
+  @Autowired
   public Message(String text) {
     this.text = text;
     this.createdDate = new Date();
   }
-
-  public Message(int id, String text, Date createdDate) {
-    this.id = id;
-    this.text = text;
-    this.createdDate = createdDate;
-  }
-
+  @Autowired
   public Integer getId() {    return id;  }
   public String getText() {    return text;  }
   public Date getCreatedDate() {    return createdDate;  }

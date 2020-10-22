@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MessageService {
-
+  @Autowired
   private MessageRepository repository;
   @Autowired
   public MessageService (MessageRepository repository) {

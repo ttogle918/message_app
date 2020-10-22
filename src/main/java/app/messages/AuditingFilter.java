@@ -20,6 +20,6 @@ public class AuditingFilter extends GenericFilterBean {
       chain.doFilter(req, res);
       long elapsed = new Date().getTime() - start;
       logger.debug("Request[uri=" + request.getRequestURI() + ", method=" +
-      request.getMethod() + "] completed in " + elapsed + "ms");
+        request.getMethod() + "] completed in " + elapsed + "ms");
     }
 }

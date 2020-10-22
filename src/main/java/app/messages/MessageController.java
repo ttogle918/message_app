@@ -8,7 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/")
+@RequestMapping("/messages")
 public class MessageController {
   private final static Logger log = Logger.getGlobal();
 
@@ -23,9 +23,10 @@ public class MessageController {
     model.addAttribute("message", "Hello, Welcome to Spring Boot!");
     return "welcome";
   }
-
-  @RequestMapping(value="/messages", method={RequestMethod.POST, RequestMethod.GET})
-  public @ResponseBody ResponseEntity<Message> saveMessage(@RequestBody MessageData data) {
+  
+  @PostMapping("")
+  @ResponseBody
+  public ResponseEntity<Message> saveMessage(@RequestBody MessageData data) {
     
     log.info("saveMsg start");
     Message saved = messageService.save(data.getText());
