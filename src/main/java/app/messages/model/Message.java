@@ -1,4 +1,4 @@
-package app.messages;
+package app.messages.model;
 
 import java.util.Date;
 import java.util.Objects;
